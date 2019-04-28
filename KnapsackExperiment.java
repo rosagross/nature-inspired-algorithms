@@ -4,10 +4,14 @@ import java.io.*;
 
 public class KnapsackExperiment {
 
-	// In the experiment we read out the items from the csv and start the HillClimb
-	// or FirstCoice HillClimb algorithm with the given weightLimit (stated in the file name)
+	/**
+	 * In the experiment we read out the items from the csv and start the HillClimb
+	 * or FirstCoice HillClimb algorithm with the given weightLimit (stated in the file name).
+	 * In the README.txt file you can find the directions on how to execute the programm.
+	 * @param args
+	 */
 	public static void main(String[] args) {
-	 
+		long startTime = System.nanoTime();
 		System.out.println("...Start Problem-Solving...\n");
 		/*
 		 * Input from user: first argument is the filename, second argument is the algorithm,
@@ -24,30 +28,34 @@ public class KnapsackExperiment {
 		String neighbourMode = args[2];
 		checkInput(csvName, algorithm, neighbourMode);
 		
+		// read out the csv-file
 	    Item[] items = getArrayFromCsv(csvName + ".csv");
 	    String[] splitted = csvName.split("_");
 	    int weightLimit = Integer.parseInt(splitted[2]);
-	
-	    System.out.println("limit: " + weightLimit);
+	    
 	    System.out.println("Values and weights of our items: ");
+	    System.out.println("The limit of the knapsack is: " + weightLimit);
 		printValues(items);
-		
-	    //call HillClimb algorithm, with specification
-	    boolean[] solvedKnapsack = KnapsackAlgorithm.solveProblem(items, weightLimit, "HillClimb", "swap");
+	    
+	    // call HillClimb or FirstCoice HillClimb, default is HillClimb
+ 		boolean firstChoice = false;
+ 		if(algorithm.equals("FirstChoiceHillClimb")) {
+ 			firstChoice = true;
+ 		}
+ 		
+ 		boolean[] solvedKnapsack = KnapsackAlgorithm.hillClimb(items, weightLimit, firstChoice, neighbourMode);
 	    
 	    System.out.println("\nSolution array: ");
-	    printMyArray(solvedKnapsack);
-	    int solutionWeight = getArrayWeight(solvedKnapsack, items);
-	    int solutionValue = KnapsackAlgorithm.getTotalValue(solvedKnapsack, items);
-	    System.out.println("The final weight of the knapsack is: " +  solutionWeight);
-	    System.out.println("The final value of the knapsack is: " +  solutionValue);
-	}
+	    printMyArray(solvedKnapsack, items);
+	    long endTime = System.nanoTime();
+	    System.out.println("Execution time: " + (endTime - startTime)/1000000);
+ 	}
 
 	/**
 	 * This method checks if the input from the user was correct
-	 * @param csvName
-	 * @param algorithm
-	 * @param neighbourMode
+	 * @param csvName the name of the csv-file
+	 * @param algorithm the algorithm type (HillClimb or FirstChoiceHillClimb)
+	 * @param neighbourMode the type of algorithm that creates the neighbourhood
 	 */
 	private static void checkInput(String csvName, String algorithm, String neighbourMode) {
 		
@@ -105,7 +113,7 @@ public class KnapsackExperiment {
   
   	/**
 	 * This method prints out the values and weights of each item in the array
-	 * @param items
+	 * @param items the array that contains the items
 	 */
 	public static void printValues(Item[] items) {
 		System.out.printf("The array contains %d items %n", items.length);
@@ -117,40 +125,39 @@ public class KnapsackExperiment {
 	}
 	
 	/**
-	 * This method prints out the array and gives back the weight of the array.
+	 * This method gives back the weight of the array.
 	 * @param itemsBool the array of the boolean items, that indicates if the item is selected or not
 	 * @param items using the item-array we can calculate the total values by using the objective function.
 	 */
 	public static int getArrayWeight(boolean[] itemsBool, Item[] items) {
-		int totalValue = 0;
 		int totalWeight = 0;
-		
-		//System.out.println("Selected items at index: ");
 		for (int j = 0; j < itemsBool.length; j++) {
 			if(itemsBool[j]) {
-				totalValue += items[j].getValue();
 				totalWeight += items[j].getWeight();
-				System.out.println(j);
 			}
 		}
-		System.out.println("Final Value: " + totalValue);
-		System.out.println("Final Weight: " + totalWeight);
 		return totalWeight;
 	}
 	
 	/**
-	 * This method prints an array out of booleans as 1s and 0s
+	 * This method prints an array out of booleans as 1s and 0s. It also prints the total weight
+	 * and total Value of the array
 	 * @param myArray the Array that is wished to be printed out
 	 */
-	static void printMyArray(boolean[] myArray){
+	static void printMyArray(boolean[] myArray, Item[] items){
+		int totalValue = 0;
+		int totalWeight = 0;
 		for (int i = 0; i < myArray.length; i++) {
 			if (myArray[i]) {
 				System.out.print(1 + " ");
+				totalValue += items[i].getValue();
+				totalWeight += items[i].getWeight();
 			}else{
 				System.out.print(0 + " ");
 			}
 		}
+		System.out.println("\nFinal Value: " + totalValue);
+		System.out.println("Final Weight: " + totalWeight);
 		System.out.print("\n");
 	}
-
 }
